@@ -44,6 +44,15 @@
             android:background="@drawable/custom_button"
             android:textColor="@color/colorButtonText" />
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/login_createbutton_text"
+            android:id="@+id/createButton"
+            android:background="@drawable/custom_button"
+            android:textColor="@color/colorButtonText" />
+
     </LinearLayout>
 
     <ProgressBar
