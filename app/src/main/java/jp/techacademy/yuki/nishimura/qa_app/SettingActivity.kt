@@ -2,7 +2,6 @@ package jp.techacademy.yuki.nishimura.qa_app
 
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.view.inputmethod.InputMethod
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
