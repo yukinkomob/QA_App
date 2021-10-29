@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             } else {
                                 byteArrayOf()
                             }
-                        Question(firestoreQuestion.title, firestoreQuestion.body, firestoreQuestion.name, firestoreQuestion.uid, firestoreQuestion.id, firestoreQuestion.genre, bytes, firestoreQuestion.answers)
+                        Question(firestoreQuestion.title, firestoreQuestion.body, firestoreQuestion.name, firestoreQuestion.uid, firestoreQuestion.id, firestoreQuestion.genre, bytes, firestoreQuestion.isFavorite, firestoreQuestion.answers)
                     }
                 }
                 mQuestionArrayList.clear()

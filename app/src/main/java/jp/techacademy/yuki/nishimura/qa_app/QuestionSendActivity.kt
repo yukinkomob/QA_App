@@ -122,7 +122,6 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener {
             val name = sp.getString(NameKEY, "")
 
             var fireStoreQuestion = FireStoreQuestion()
-
             fireStoreQuestion.uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             fireStoreQuestion.title = title
             fireStoreQuestion.body = body

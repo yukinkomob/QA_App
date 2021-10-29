@@ -10,5 +10,6 @@ class FireStoreQuestion {
     var uid = ""
     var image = ""
     var genre = 0
+    var isFavorite = false
     var answers: ArrayList<Answer> = arrayListOf()
 }

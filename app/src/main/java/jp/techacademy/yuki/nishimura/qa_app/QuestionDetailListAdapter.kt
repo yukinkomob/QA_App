@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.list_question_detail.view.*
 
 class QuestionDetailListAdapter(context: Context, private val mQuestion: Question) : BaseAdapter() {
@@ -19,6 +21,8 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
     }
 
     private var mLayoutInflater: LayoutInflater? = null
+
+    private var mCurrentIsFavorite: Boolean = mQuestion.isFavorite
 
     init {
         mLayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -69,6 +73,26 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
                 val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size).copy(Bitmap.Config.ARGB_8888, true)
                 val imageView = convertView.findViewById<View>(R.id.imageView) as ImageView
                 imageView.setImageBitmap(image)
+            }
+
+            val favoriteImageView = convertView.favoriteImageView as ImageView
+            favoriteImageView.setImageResource(if (mCurrentIsFavorite) android.R.drawable.btn_star_big_on else android.R.drawable.btn_star_big_off)
+            favoriteImageView.setOnClickListener {
+                Snackbar.make(convertView!!, "お気に入りボタンが押されました", Snackbar.LENGTH_LONG).show()
+
+                val newIsFavorite = !mCurrentIsFavorite
+                FirebaseFirestore.getInstance()
+                    .collection(ContentsPATH)
+                    .document(mQuestion.questionUid)
+                    .update("isFavorite", newIsFavorite)
+                    .addOnSuccessListener {
+                        mCurrentIsFavorite = newIsFavorite
+                        notifyDataSetChanged()
+                    }
+                    .addOnFailureListener {
+                        it.printStackTrace()
+                        Snackbar.make(convertView!!, "お気に入りの更新に失敗しました", Snackbar.LENGTH_LONG).show()
+                    }
             }
         } else {
             if (convertView == null) {
