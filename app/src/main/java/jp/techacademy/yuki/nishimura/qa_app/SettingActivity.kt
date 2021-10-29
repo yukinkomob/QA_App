@@ -15,8 +15,8 @@ class SettingActivity : AppCompatActivity() {
 
     private lateinit var mDataBaseReference: DatabaseReference
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
 
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
