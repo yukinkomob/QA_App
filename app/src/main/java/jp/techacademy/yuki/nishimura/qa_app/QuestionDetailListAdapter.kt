@@ -84,7 +84,7 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
                 FirebaseFirestore.getInstance()
                     .collection(ContentsPATH)
                     .document(mQuestion.questionUid)
-                    .update("isFavorite", newIsFavorite)
+                    .update("favorite", newIsFavorite)
                     .addOnSuccessListener {
                         mCurrentIsFavorite = newIsFavorite
                         notifyDataSetChanged()

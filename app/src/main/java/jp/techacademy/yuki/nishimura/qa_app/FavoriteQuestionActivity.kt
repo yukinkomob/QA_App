@@ -1,9 +1,9 @@
 package jp.techacademy.yuki.nishimura.qa_app
 
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -11,15 +11,15 @@ import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-
+class FavoriteQuestionActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var mGenre = 0
 
     private lateinit var mDatabaseReference: DatabaseReference
@@ -111,10 +111,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
 
-        if (id == R.id.nav_favorite) {
-            toolbar.title = getString(R.string.menu_favorite_label)
-            mGenre = 100
-        } else if (id == R.id.nav_hobby) {
+        if (id == R.id.nav_hobby) {
             toolbar.title = getString(R.string.menu_hobby_label)
             mGenre = 1
         } else if (id == R.id.nav_life) {
@@ -135,9 +132,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         snapShotListener?.remove()
 
-        val collectionRef = FirebaseFirestore.getInstance().collection(ContentsPATH)
-        val query = if (mGenre == 100) collectionRef.whereEqualTo("favorite", true) else collectionRef.whereEqualTo("genre", mGenre)
-        snapShotListener = query
+        snapShotListener = FirebaseFirestore.getInstance()
+            .collection(ContentsPATH)
+            .whereEqualTo("genre", mGenre)
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 if (firebaseFirestoreException != null) {
                     return@addSnapshotListener

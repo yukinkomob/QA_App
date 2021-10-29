@@ -17,14 +17,10 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
 import android.view.View
-import android.view.inputmethod.InputMethod
 import android.view.inputmethod.InputMethodManager
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_question_send.*
 import java.io.ByteArrayOutputStream
@@ -127,6 +123,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener {
             fireStoreQuestion.body = body
             fireStoreQuestion.name = name!!
             fireStoreQuestion.genre = mGenre
+            fireStoreQuestion.isFavorite = false
 
             val drawable = imageView.drawable as? BitmapDrawable
 
