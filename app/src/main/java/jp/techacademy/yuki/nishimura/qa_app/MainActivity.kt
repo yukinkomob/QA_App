@@ -147,6 +147,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mAdapter = QuestionsListAdapter(this)
         mQuestionArrayList = ArrayList<Question>()
         mAdapter.notifyDataSetChanged()
+
+        listView.setOnItemClickListener { parent, view, position, id ->
+            val intent = Intent(applicationContext, QuestionDetailActivity::class.java)
+            intent.putExtra("question", mQuestionArrayList[position])
+            startActivity(intent)
+        }
     }
 
     override fun onResume() {
