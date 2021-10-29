@@ -10,6 +10,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.list_question_detail.view.*
 
@@ -75,24 +76,31 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
                 imageView.setImageBitmap(image)
             }
 
-            val favoriteImageView = convertView.favoriteImageView as ImageView
-            favoriteImageView.setImageResource(if (mCurrentIsFavorite) android.R.drawable.btn_star_big_on else android.R.drawable.btn_star_big_off)
-            favoriteImageView.setOnClickListener {
-                Snackbar.make(convertView!!, "お気に入りボタンが押されました", Snackbar.LENGTH_LONG).show()
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val favoriteImageView = convertView.favoriteImageView as ImageView
+                favoriteImageView.setImageResource(if (mCurrentIsFavorite) android.R.drawable.btn_star_big_on else android.R.drawable.btn_star_big_off)
+                favoriteImageView.setOnClickListener {
+                    Snackbar.make(convertView!!, "お気に入りボタンが押されました", Snackbar.LENGTH_LONG).show()
 
-                val newIsFavorite = !mCurrentIsFavorite
-                FirebaseFirestore.getInstance()
-                    .collection(ContentsPATH)
-                    .document(mQuestion.questionUid)
-                    .update("favorite", newIsFavorite)
-                    .addOnSuccessListener {
-                        mCurrentIsFavorite = newIsFavorite
-                        notifyDataSetChanged()
-                    }
-                    .addOnFailureListener {
-                        it.printStackTrace()
-                        Snackbar.make(convertView!!, "お気に入りの更新に失敗しました", Snackbar.LENGTH_LONG).show()
-                    }
+                    val newIsFavorite = !mCurrentIsFavorite
+                    FirebaseFirestore.getInstance()
+                        .collection(ContentsPATH)
+                        .document(mQuestion.questionUid)
+                        .update("favorite", newIsFavorite)
+                        .addOnSuccessListener {
+                            mCurrentIsFavorite = newIsFavorite
+                            notifyDataSetChanged()
+                        }
+                        .addOnFailureListener {
+                            it.printStackTrace()
+                            Snackbar.make(convertView!!, "お気に入りの更新に失敗しました", Snackbar.LENGTH_LONG)
+                                .show()
+                        }
+                }
+            } else {
+                val favoriteImageView = convertView.favoriteImageView as ImageView
+                favoriteImageView.visibility = View.GONE
             }
         } else {
             if (convertView == null) {
