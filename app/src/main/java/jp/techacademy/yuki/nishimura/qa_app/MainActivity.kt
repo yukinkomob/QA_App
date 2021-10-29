@@ -54,17 +54,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        val toggle = ActionBarDrawerToggle(
-            this,
-            drawer_layout,
-            toolbar,
-            R.string.app_name,
-            R.string.app_name
-        )
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        nav_view.setNavigationItemSelectedListener(this)
+        updateNavigationMenu()
 
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
@@ -79,11 +69,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    private fun updateNavigationMenu() {
+        val user = FirebaseAuth.getInstance().currentUser
+        nav_view.menu.findItem(R.id.nav_favorite).isVisible = user != null
+        val toggle = ActionBarDrawerToggle(
+            this,
+            drawer_layout,
+            toolbar,
+            R.string.app_name,
+            R.string.app_name
+        )
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        nav_view.setNavigationItemSelectedListener(this)
+    }
+
     override fun onResume() {
         super.onResume()
         if (mGenre == 0) {
-            onNavigationItemSelected(nav_view.menu.getItem(0))
+            onNavigationItemSelected(nav_view.menu.getItem(1))
         }
+        updateNavigationMenu()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
