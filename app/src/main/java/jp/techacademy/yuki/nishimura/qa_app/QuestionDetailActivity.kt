@@ -60,26 +60,35 @@ class QuestionDetailActivity : AppCompatActivity() {
 
         title = mQuestion.title
 
-        mAdapter = QuestionDetailListAdapter(this, mQuestion)
-        listView.adapter = mAdapter
-        mAdapter.notifyDataSetChanged()
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val databaseReference = FirebaseDatabase.getInstance().reference
+            databaseReference.child(FavoritePATH).child(mQuestion.uid)
+                .child(mQuestion.questionUid).get().addOnCompleteListener { task ->
+                    val value = task.result?.value
+                    val isFavorite = value != null
+                    mAdapter = QuestionDetailListAdapter(this, mQuestion, isFavorite)
+                    listView.adapter = mAdapter
+                    mAdapter.notifyDataSetChanged()
 
-        fab.setOnClickListener {
-            val user = FirebaseAuth.getInstance().currentUser
+                    fab.setOnClickListener {
+                        val user = FirebaseAuth.getInstance().currentUser
 
-            if (user == null) {
-                val intent = Intent(applicationContext, LoginActivity::class.java)
-                startActivity(intent)
-            } else {
-                val intent = Intent(applicationContext, AnswerSendActivity::class.java)
-                intent.putExtra("question", mQuestion)
-                startActivity(intent)
-            }
+                        if (user == null) {
+                            val intent = Intent(applicationContext, LoginActivity::class.java)
+                            startActivity(intent)
+                        } else {
+                            val intent = Intent(applicationContext, AnswerSendActivity::class.java)
+                            intent.putExtra("question", mQuestion)
+                            startActivity(intent)
+                        }
+                    }
+
+                    val databaseReference = FirebaseDatabase.getInstance().reference
+                    mAnswerRef = databaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(
+                        AnswersPATH)
+                    mAnswerRef.addChildEventListener(mEventListener)
+                }
         }
-
-        val databaseReference = FirebaseDatabase.getInstance().reference
-        mAnswerRef = databaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(
-            AnswersPATH)
-        mAnswerRef.addChildEventListener(mEventListener)
     }
 }

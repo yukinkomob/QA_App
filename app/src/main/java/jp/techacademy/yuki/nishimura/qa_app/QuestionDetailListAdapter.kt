@@ -11,10 +11,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.list_question_detail.view.*
 
-class QuestionDetailListAdapter(context: Context, private val mQuestion: Question) : BaseAdapter() {
+class QuestionDetailListAdapter(context: Context, private val mQuestion: Question, private val isFavorite: Boolean) : BaseAdapter() {
 
     companion object {
         private val TYPE_QUESTION = 0
@@ -22,11 +22,11 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
     }
 
     private var mLayoutInflater: LayoutInflater? = null
-
-    private var mCurrentIsFavorite: Boolean = mQuestion.isFavorite
+    private var mCurrentIsFavorite = isFavorite
 
     init {
-        mLayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        mLayoutInflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     }
 
     override fun getCount(): Int {
@@ -58,7 +58,8 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
 
         if (getItemViewType(position) == TYPE_QUESTION) {
             if (convertView == null) {
-                convertView = mLayoutInflater!!.inflate(R.layout.list_question_detail, parent, false)!!
+                convertView =
+                    mLayoutInflater!!.inflate(R.layout.list_question_detail, parent, false)!!
             }
             val body = mQuestion.body
             val name = mQuestion.name
@@ -71,7 +72,8 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
 
             val bytes = mQuestion.imageBytes
             if (bytes.isNotEmpty()) {
-                val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size).copy(Bitmap.Config.ARGB_8888, true)
+                val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    .copy(Bitmap.Config.ARGB_8888, true)
                 val imageView = convertView.findViewById<View>(R.id.imageView) as ImageView
                 imageView.setImageBitmap(image)
             }
@@ -84,19 +86,18 @@ class QuestionDetailListAdapter(context: Context, private val mQuestion: Questio
                     Snackbar.make(convertView!!, "お気に入りボタンが押されました", Snackbar.LENGTH_LONG).show()
 
                     val newIsFavorite = !mCurrentIsFavorite
-                    FirebaseFirestore.getInstance()
-                        .collection(ContentsPATH)
-                        .document(mQuestion.questionUid)
-                        .update("favorite", newIsFavorite)
-                        .addOnSuccessListener {
-                            mCurrentIsFavorite = newIsFavorite
-                            notifyDataSetChanged()
-                        }
-                        .addOnFailureListener {
-                            it.printStackTrace()
-                            Snackbar.make(convertView!!, "お気に入りの更新に失敗しました", Snackbar.LENGTH_LONG)
-                                .show()
-                        }
+                    val databaseReference = FirebaseDatabase.getInstance().reference
+                    val questionRef = databaseReference.child(FavoritePATH).child(mQuestion.uid)
+                        .child(mQuestion.questionUid)
+                    if (newIsFavorite) {
+                        val data = HashMap<String, String>()
+                        data["isFavorite"] = "true"
+                        questionRef.push().setValue(data)
+                    } else {
+                        questionRef.removeValue()
+                    }
+                    mCurrentIsFavorite = newIsFavorite
+                    notifyDataSetChanged()
                 }
             } else {
                 val favoriteImageView = convertView.favoriteImageView as ImageView
