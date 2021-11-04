@@ -3,6 +3,7 @@ package jp.techacademy.yuki.nishimura.qa_app
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         listView.setOnItemClickListener { parent, view, position, id ->
             val intent = Intent(applicationContext, QuestionDetailActivity::class.java)
             intent.putExtra("question", mQuestionArrayList[position])
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_DETAIL_CODE)
         }
     }
 
@@ -100,6 +101,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 mGenre = 1
                 updateNavigationMenu()
                 onNavigationItemSelected(nav_view.menu.getItem(1))
+            }
+        } else if (requestCode == REQUEST_DETAIL_CODE) {
+            if (mGenre == 100) {
+                updateNavigationMenu()
+                onNavigationItemSelected(nav_view.menu.getItem(0))
             }
         }
     }
@@ -153,14 +159,34 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         snapShotListener?.remove()
 
-        // TODO 該当する uid のお気に入り questionUid を取得
+        when (mGenre) {
+            100 -> {
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user != null) {
+                    val databaseReference = FirebaseDatabase.getInstance().reference
+                    databaseReference.child(FavoritePATH).child(user.uid).get()
+                        .addOnSuccessListener {
+                            val questionUids = it.children.map { it2 -> it2.key }
+                            Log.i("firebase2", "Success getting data")
+                            updateQuestionList(questionUids)
+                        }.addOnFailureListener {
+                            Log.e("firebase2", "Error getting data", it)
+                        }
+                }
+            }
+            else -> {
+                updateQuestionList()
+            }
+        }
+        return true
+    }
 
-
-
-        // TODO questionUid を基に該当する質問データを検索
-
+    private fun updateQuestionList(questionUids: List<String?>? = null) {
         val collectionRef = FirebaseFirestore.getInstance().collection(ContentsPATH)
-        val query = if (mGenre == 100) collectionRef.whereEqualTo("favorite", true) else collectionRef.whereEqualTo("genre", mGenre)
+        val query = if (mGenre == 100) collectionRef.whereIn(
+            "id",
+            questionUids!!
+        ) else collectionRef.whereEqualTo("genre", mGenre)
         snapShotListener = query
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 if (firebaseFirestoreException != null) {
@@ -176,17 +202,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             } else {
                                 byteArrayOf()
                             }
-                        Question(firestoreQuestion.title, firestoreQuestion.body, firestoreQuestion.name, firestoreQuestion.uid, firestoreQuestion.id, firestoreQuestion.genre, bytes, firestoreQuestion.answers)
+                        Question(
+                            firestoreQuestion.title,
+                            firestoreQuestion.body,
+                            firestoreQuestion.name,
+                            firestoreQuestion.uid,
+                            firestoreQuestion.id,
+                            firestoreQuestion.genre,
+                            bytes,
+                            firestoreQuestion.answers
+                        )
                     }
                 }
                 mQuestionArrayList.clear()
                 mQuestionArrayList.addAll(questions)
                 mAdapter.notifyDataSetChanged()
             }
-        return true
     }
 
     companion object {
         const val REQUEST_SETTINGS_CODE = 1000
+        const val REQUEST_DETAIL_CODE = 2000
     }
 }
