@@ -93,6 +93,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         updateNavigationMenu()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_SETTINGS_CODE && resultCode == SettingActivity.RESULT_LOGOUT_CODE) {
+            if (mGenre == 100) {
+                mGenre = 1
+                updateNavigationMenu()
+                onNavigationItemSelected(nav_view.menu.getItem(1))
+            }
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -108,7 +119,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (id == R.id.action_settings) {
             val intent = Intent(applicationContext, SettingActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_SETTINGS_CODE)
             return true
         }
 
@@ -142,6 +153,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         snapShotListener?.remove()
 
+        // TODO 該当する uid のお気に入り questionUid を取得
+
+
+
+        // TODO questionUid を基に該当する質問データを検索
+
         val collectionRef = FirebaseFirestore.getInstance().collection(ContentsPATH)
         val query = if (mGenre == 100) collectionRef.whereEqualTo("favorite", true) else collectionRef.whereEqualTo("genre", mGenre)
         snapShotListener = query
@@ -167,5 +184,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 mAdapter.notifyDataSetChanged()
             }
         return true
+    }
+
+    companion object {
+        const val REQUEST_SETTINGS_CODE = 1000
     }
 }

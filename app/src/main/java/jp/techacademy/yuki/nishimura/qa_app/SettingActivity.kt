@@ -55,6 +55,11 @@ class SettingActivity : AppCompatActivity() {
             FirebaseAuth.getInstance().signOut()
             nameText.setText("")
             Snackbar.make(v, getString(R.string.logout_complete_message), Snackbar.LENGTH_LONG).show()
+            setResult(RESULT_LOGOUT_CODE)
         }
+    }
+
+    companion object {
+        const val RESULT_LOGOUT_CODE = 100
     }
 }
